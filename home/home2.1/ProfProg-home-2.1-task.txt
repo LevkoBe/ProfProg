@@ -1,0 +1,6 @@
+TASK 1. Automate your test cases from the task 3.b of the class work 2.1
+with writing corresponding Bash or PowerShell script.
+Test your C++ application with the script.
+
+TASK 2. Port C++ application to the language you are using for the homeworks.
+Use autotests from Task1 to check the program qualiity.
