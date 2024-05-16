@@ -9,29 +9,29 @@ unordered_map<string, int> userHistory;
 void handleNameEntry(const string& name) {
     if (name == "bread") {
         userHistory.clear();
-        cout << "Secret word was entered. Clearing all the history...";
+        cout << "Secret word was entered. Clearing all the history..." << endl;
             return;
     }
     if (userHistory.find(name) != userHistory.end()) {
         userHistory[name]++;
-        cout << "Hello again(x" << userHistory[name] << "), " << name << "!";
+        cout << "Hello again(x" << userHistory[name] << "), " << name << "!" << endl;
     } else {
         userHistory[name] = 1;
-        cout << "Welcome, " << name << "!";
+        cout << "Welcome, " << name << "!" << endl;
     }
 }
 
 void handleNameDeletion(const string& name) {
     if (userHistory.find(name) != userHistory.end()) {
         userHistory.erase(name);
-        cout << "History for " << name << " was deleted.";
+        cout << "History for " << name << " was deleted." << endl;
     } else {
-        cout << "No history found for " << name << ".";
+        cout << "No history found for " << name << "." << endl;
     }
 }
 
 void errorMessage() {
-    cout << "Please, enter a valid command (e.g. \"hello [username]\", or \"[username] delete\").";
+    cout << "Please, enter a valid command (e.g. \"hello [username]\", or \"[username] delete\")." << endl;
 }
 
 void handleTwoParts(const string& input) {
@@ -59,13 +59,13 @@ int main() {
     string input;
     
     while (true) {
-        cout << "\n--> ";
+        cout << "--> ";
         getline(cin, input);
         
         size_t spacePos = input.find(' ');
         if (spacePos == string::npos) {
             if (input.find("hello") == 0 || input.find("hi") == 0) {
-                std::cout << "Hello!";
+                std::cout << "Hello!" << endl;
                 continue;
             }
             if (input == "exit") {

@@ -1,18 +1,38 @@
 #!/bin/bash
 
-# Compile the C++ program
-clang++ -Wall -Wextra -Wpedantic -Werror -std=c++23 hello.cpp -o hello_program
+# check if argument provided
+if [ $# -eq 0 ]; then
+    echo "Error: No argument provided."
+    echo "Usage: $0 <language: c++, or rust>"
+    echo "Example: \"./tester.sh rust\""
+    exit 1
+fi
+if [ "$1" != "c++" ] && [ "$1" != "rust" ]; then
+    echo "Error: Invalid argument provided."
+    echo "Usage: $0 <language: c++, or rust>"
+    echo "Example: \"./tester.sh c++\""
+    exit 1
+fi
+if [ "$1" == "c++" ]; then
+    # Compile the C++ program
+    clang++ -Wall -Wextra -Wpedantic -Werror -std=c++23 hello.cpp -o hello_program
+    binaries="./hello_program"
+fi
+if [ "$1" == "rust" ]; then
+    # Build the Rust program using Cargo
+    cargo build --quiet
+    binaries="cargo run --quiet"
+fi
 
 # Test Case 0: Testing "hi"
 echo "Test Case 0: Testing 'hi'"
-actual_output=$(./hello_program <<EOF
+actual_output=$($binaries <<EOF
 hi
 exit
 EOF
 )
 
-expected_output="
---> Hello!
+expected_output="--> Hello!
 --> "
 diff_output=$(diff -Z <(echo -n -e "$expected_output") <(echo -n -e "$actual_output"))
 exit_status=$?
@@ -29,7 +49,7 @@ echo ""
 
 # Test Case 1: Testing multiple greetings to the same user
 echo "Test Case 1: Testing multiple greetings to the same user"
-actual_output=$(./hello_program <<EOF
+actual_output=$($binaries <<EOF
 hello John
 hello John
 hello John
@@ -39,8 +59,7 @@ exit
 EOF
 )
 
-expected_output="
---> Welcome, John!
+expected_output="--> Welcome, John!
 --> Hello again(x2), John!
 --> Hello again(x3), John!
 --> Hello again(x4), John!
@@ -61,7 +80,7 @@ echo ""
 
 # Test Case 2: Testing user history deletion
 echo "Test Case 2: Testing user history deletion"
-actual_output=$(./hello_program <<EOF
+actual_output=$($binaries <<EOF
 John delete
 hello John
 hello John
@@ -71,8 +90,7 @@ exit
 EOF
 )
 
-expected_output="
---> No history found for John.
+expected_output="--> No history found for John.
 --> Welcome, John!
 --> Hello again(x2), John!
 --> History for John was deleted.
@@ -93,7 +111,7 @@ echo ""
 
 # Test Case 3: Testing secret word handling
 echo "Test Case 3: Testing secret word handling"
-actual_output=$(./hello_program <<EOF
+actual_output=$($binaries <<EOF
 hello Jane
 hello Jane
 hello bread
@@ -103,8 +121,7 @@ exit
 EOF
 )
 
-expected_output="
---> Welcome, Jane!
+expected_output="--> Welcome, Jane!
 --> Hello again(x2), Jane!
 --> Secret word was entered. Clearing all the history...
 --> Welcome, John!
@@ -125,7 +142,7 @@ echo ""
 
 # Test Case 4: Testing greetings to multiple users
 echo "Test Case 4: Testing greetings to multiple users"
-actual_output=$(./hello_program <<EOF
+actual_output=$($binaries <<EOF
 hello Alice
 hello Alice
 hello Alice
@@ -137,8 +154,7 @@ exit
 EOF
 )
 
-expected_output="
---> Welcome, Alice!
+expected_output="--> Welcome, Alice!
 --> Hello again(x2), Alice!
 --> Hello again(x3), Alice!
 --> Welcome, Bob!
@@ -161,7 +177,7 @@ echo ""
 
 # Test Case 5: Testing user deletion and secret word
 echo "Test Case 5: Testing user deletion and secret word"
-actual_output=$(./hello_program <<EOF
+actual_output=$($binaries <<EOF
 hello Mary
 hello Mary
 hello Mary
@@ -174,8 +190,7 @@ exit
 EOF
 )
 
-expected_output="
---> Welcome, Mary!
+expected_output="--> Welcome, Mary!
 --> Hello again(x2), Mary!
 --> Hello again(x3), Mary!
 --> History for Mary was deleted.
@@ -199,7 +214,7 @@ echo ""
 
 # Test Case 6: Testing user deletion and secret word
 echo "Test Case 6: Testing user deletion and secret word"
-actual_output=$(./hello_program <<EOF
+actual_output=$($binaries <<EOF
 hello Peter
 hello Peter
 hello Peter
@@ -212,8 +227,7 @@ exit
 EOF
 )
 
-expected_output="
---> Welcome, Peter!
+expected_output="--> Welcome, Peter!
 --> Hello again(x2), Peter!
 --> Hello again(x3), Peter!
 --> Secret word was entered. Clearing all the history...
@@ -237,7 +251,7 @@ echo ""
 
 # Test Case 7: Testing multiple word usernames
 echo "Test Case 7: Testing multiple word usernames"
-actual_output=$(./hello_program <<EOF
+actual_output=$($binaries <<EOF
 hello John Smith
 hello John Smith
 hello John Smith
@@ -248,8 +262,7 @@ exit
 EOF
 )
 
-expected_output="
---> Welcome, John Smith!
+expected_output="--> Welcome, John Smith!
 --> Hello again(x2), John Smith!
 --> Hello again(x3), John Smith!
 --> Welcome, Alice Cooper!
@@ -271,7 +284,7 @@ echo ""
 
 # Test Case 8: Testing invalid commands
 echo "Test Case 8: Testing invalid commands"
-actual_output=$(./hello_program <<EOF
+actual_output=$($binaries <<EOF
 xyz
 John
 hello John delete
@@ -283,15 +296,15 @@ exit
 EOF
 )
 
-expected_output="
---> Please, enter a valid command (e.g. \"hello [username]\", or \"[username] delete\").
+expected_output="--> Please, enter a valid command (e.g. \"hello [username]\", or \"[username] delete\").
 --> Please, enter a valid command (e.g. \"hello [username]\", or \"[username] delete\").
 --> Welcome, John delete!
 --> Hello!
 --> Please, enter a valid command (e.g. \"hello [username]\", or \"[username] delete\").
 --> Hello!
 --> Please, enter a valid command (e.g. \"hello [username]\", or \"[username] delete\").
---> "
+--> 
+"
 diff_output=$(diff -Z <(echo -n -e "$expected_output") <(echo -n -e "$actual_output"))
 exit_status=$?
 if [ $exit_status -eq 0 ]; then
@@ -303,10 +316,12 @@ else
     echo "Differences:"
     echo "$diff_output"
 fi
-echo ""
 
-# Clean up
-rm hello_program
+if [ "$1" == "c++" ]; then
+    echo ""
+    # Clean up
+    rm hello_program
+fi
 
 # Exit with the appropriate status
 exit $exit_status
