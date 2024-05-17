@@ -1,6 +1,40 @@
 #!/bin/bash
+test_count=0
 
-# check if argument provided
+# Function to run a test case
+run_test() {
+    local case_title="$1"
+    local input="$2"
+    local expected_output="$3"
+    
+    # Run the test case
+    actual_output=$($binaries <<EOF
+$input
+EOF
+)
+    
+    # Compare actual and expected outputs
+    diff_output=$(diff -Z <(echo -n -e "$expected_output") <(echo -n -e "$actual_output"))
+    exit_status=$?
+    
+    # Display test result
+    test_count=$((test_count + 1))
+    echo "Test Case #$test_count: $case_title: $exit_status"
+    if [ $exit_status -eq 0 ]; then
+        echo "Test Passed: Actual and expected outputs match."
+    else
+        echo "Test Failed: Actual and expected outputs do not match."
+        echo "Actual output:"
+        echo "$actual_output"
+        echo "Differences:"
+        echo "$diff_output"
+    fi
+    echo ""
+}
+
+# Main script
+
+# Check if argument provided
 if [ $# -eq 0 ]; then
     echo "Error: No argument provided."
     echo "Usage: $0 <language: c++, or rust>"
@@ -24,137 +58,61 @@ if [ "$1" == "rust" ]; then
     binaries="cargo run --quiet"
 fi
 
-# Test Case 0: Testing "hi"
-echo "Test Case 0: Testing 'hi'"
-actual_output=$($binaries <<EOF
-hi
-exit
-EOF
-)
-
-expected_output="--> Hello!
+# Test cases
+run_test "Testing 'hi'" \
+"hi
+exit" \
+"--> Hello!
 --> "
-diff_output=$(diff -Z <(echo -n -e "$expected_output") <(echo -n -e "$actual_output"))
-exit_status=$?
-if [ $exit_status -eq 0 ]; then
-    echo "Test Passed: Output matches the expected output."
-else
-    echo "Test Failed: Output does not match the expected output."
-    echo "Actual output:"
-    echo "$actual_output"
-    echo "Differences:"
-    echo "$diff_output"
-fi
-echo ""
-
-# Test Case 1: Testing multiple greetings to the same user
-echo "Test Case 1: Testing multiple greetings to the same user"
-actual_output=$($binaries <<EOF
+run_test "Testing multiple greetings to the same user" \
+"hello John
 hello John
 hello John
 hello John
 hello John
-hello John
-exit
-EOF
-)
-
-expected_output="--> Welcome, John!
+exit" \
+"--> Welcome, John!
 --> Hello again(x2), John!
 --> Hello again(x3), John!
 --> Hello again(x4), John!
 --> Hello again(x5), John!
 --> "
-diff_output=$(diff -Z <(echo -n -e "$expected_output") <(echo -n -e "$actual_output"))
-exit_status=$?
-if [ $exit_status -eq 0 ]; then
-    echo "Test Passed: Output matches the expected output."
-else
-    echo "Test Failed: Output does not match the expected output."
-    echo "Actual output:"
-    echo "$actual_output"
-    echo "Differences:"
-    echo "$diff_output"
-fi
-echo ""
-
-# Test Case 2: Testing user history deletion
-echo "Test Case 2: Testing user history deletion"
-actual_output=$($binaries <<EOF
-John delete
+run_test "Testing user history deletion" \
+"John delete
 hello John
 hello John
 John delete
 hello John
-exit
-EOF
-)
-
-expected_output="--> No history found for John.
+exit" \
+"--> No history found for John.
 --> Welcome, John!
 --> Hello again(x2), John!
 --> History for John was deleted.
 --> Welcome, John!
 --> "
-diff_output=$(diff -Z <(echo -n -e "$expected_output") <(echo -n -e "$actual_output"))
-exit_status=$?
-if [ $exit_status -eq 0 ]; then
-    echo "Test Passed: Output matches the expected output."
-else
-    echo "Test Failed: Output does not match the expected output."
-    echo "Actual output:"
-    echo "$actual_output"
-    echo "Differences:"
-    echo "$diff_output"
-fi
-echo ""
-
-# Test Case 3: Testing secret word handling
-echo "Test Case 3: Testing secret word handling"
-actual_output=$($binaries <<EOF
-hello Jane
+run_test "Testing secret word handling" \
+"hello Jane
 hello Jane
 hello bread
 hello John
 hello Jane
-exit
-EOF
-)
-
-expected_output="--> Welcome, Jane!
+exit" \
+"--> Welcome, Jane!
 --> Hello again(x2), Jane!
 --> Secret word was entered. Clearing all the history...
 --> Welcome, John!
 --> Welcome, Jane!
 --> "
-diff_output=$(diff -Z <(echo -n -e "$expected_output") <(echo -n -e "$actual_output"))
-exit_status=$?
-if [ $exit_status -eq 0 ]; then
-    echo "Test Passed: Output matches the expected output."
-else
-    echo "Test Failed: Output does not match the expected output."
-    echo "Actual output:"
-    echo "$actual_output"
-    echo "Differences:"
-    echo "$diff_output"
-fi
-echo ""
-
-# Test Case 4: Testing greetings to multiple users
-echo "Test Case 4: Testing greetings to multiple users"
-actual_output=$($binaries <<EOF
-hello Alice
+run_test "Testing greetings to multiple users" \
+"hello Alice
 hello Alice
 hello Alice
 hello Bob
 hello Bob
 hello Alice
 hello Bob
-exit
-EOF
-)
-
-expected_output="--> Welcome, Alice!
+exit" \
+"--> Welcome, Alice!
 --> Hello again(x2), Alice!
 --> Hello again(x3), Alice!
 --> Welcome, Bob!
@@ -162,23 +120,8 @@ expected_output="--> Welcome, Alice!
 --> Hello again(x4), Alice!
 --> Hello again(x3), Bob!
 --> "
-diff_output=$(diff -Z <(echo -n -e "$expected_output") <(echo -n -e "$actual_output"))
-exit_status=$?
-if [ $exit_status -eq 0 ]; then
-    echo "Test Passed: Output matches the expected output."
-else
-    echo "Test Failed: Output does not match the expected output."
-    echo "Actual output:"
-    echo "$actual_output"
-    echo "Differences:"
-    echo "$diff_output"
-fi
-echo ""
-
-# Test Case 5: Testing user deletion and secret word
-echo "Test Case 5: Testing user deletion and secret word"
-actual_output=$($binaries <<EOF
-hello Mary
+run_test "Testing user deletion and secret word" \
+"hello Mary
 hello Mary
 hello Mary
 Mary delete
@@ -186,11 +129,8 @@ hello Mary
 hello Mary
 Mary delete
 hello bread
-exit
-EOF
-)
-
-expected_output="--> Welcome, Mary!
+exit" \
+"--> Welcome, Mary!
 --> Hello again(x2), Mary!
 --> Hello again(x3), Mary!
 --> History for Mary was deleted.
@@ -199,23 +139,8 @@ expected_output="--> Welcome, Mary!
 --> History for Mary was deleted.
 --> Secret word was entered. Clearing all the history...
 --> "
-diff_output=$(diff -Z <(echo -n -e "$expected_output") <(echo -n -e "$actual_output"))
-exit_status=$?
-if [ $exit_status -eq 0 ]; then
-    echo "Test Passed: Output matches the expected output."
-else
-    echo "Test Failed: Output does not match the expected output."
-    echo "Actual output:"
-    echo "$actual_output"
-    echo "Differences:"
-    echo "$diff_output"
-fi
-echo ""
-
-# Test Case 6: Testing user deletion and secret word
-echo "Test Case 6: Testing user deletion and secret word"
-actual_output=$($binaries <<EOF
-hello Peter
+run_test "Testing user deletion and secret word" \
+"hello Peter
 hello Peter
 hello Peter
 hello bread
@@ -223,11 +148,8 @@ hello Peter
 hello Peter
 Peter delete
 hello Peter
-exit
-EOF
-)
-
-expected_output="--> Welcome, Peter!
+exit" \
+"--> Welcome, Peter!
 --> Hello again(x2), Peter!
 --> Hello again(x3), Peter!
 --> Secret word was entered. Clearing all the history...
@@ -236,92 +158,33 @@ expected_output="--> Welcome, Peter!
 --> History for Peter was deleted.
 --> Welcome, Peter!
 --> "
-diff_output=$(diff -Z <(echo -n -e "$expected_output") <(echo -n -e "$actual_output"))
-exit_status=$?
-if [ $exit_status -eq 0 ]; then
-    echo "Test Passed: Output matches the expected output."
-else
-    echo "Test Failed: Output does not match the expected output."
-    echo "Actual output:"
-    echo "$actual_output"
-    echo "Differences:"
-    echo "$diff_output"
-fi
-echo ""
-
-# Test Case 7: Testing multiple word usernames
-echo "Test Case 7: Testing multiple word usernames"
-actual_output=$($binaries <<EOF
-hello John Smith
+run_test "Testing multiple word usernames" \
+"hello John Smith
 hello John Smith
 hello John Smith
 hello Alice Cooper
 hello Alice Cooper
 hello Alice Cooper
-exit
-EOF
-)
-
-expected_output="--> Welcome, John Smith!
+exit" \
+"--> Welcome, John Smith!
 --> Hello again(x2), John Smith!
 --> Hello again(x3), John Smith!
 --> Welcome, Alice Cooper!
 --> Hello again(x2), Alice Cooper!
 --> Hello again(x3), Alice Cooper!
 --> "
-diff_output=$(diff -Z <(echo -n -e "$expected_output") <(echo -n -e "$actual_output"))
-exit_status=$?
-if [ $exit_status -eq 0 ]; then
-    echo "Test Passed: Output matches the expected output."
-else
-    echo "Test Failed: Output does not match the expected output."
-    echo "Actual output:"
-    echo "$actual_output"
-    echo "Differences:"
-    echo "$diff_output"
-fi
-echo ""
-
-# Test Case 8: Testing invalid commands
-echo "Test Case 8: Testing invalid commands"
-actual_output=$($binaries <<EOF
-xyz
+run_test "Testing invalid commands" \
+"xyz
 John
 hello John delete
 helloJohn
-
 hello
 hello 
-exit
-EOF
-)
-
-expected_output="--> Please, enter a valid command (e.g. \"hello [username]\", or \"[username] delete\").
+exit" \
+"--> Please, enter a valid command (e.g. \"hello [username]\", or \"[username] delete\").
 --> Please, enter a valid command (e.g. \"hello [username]\", or \"[username] delete\").
 --> Welcome, John delete!
 --> Hello!
---> Please, enter a valid command (e.g. \"hello [username]\", or \"[username] delete\").
 --> Hello!
 --> Please, enter a valid command (e.g. \"hello [username]\", or \"[username] delete\").
---> 
-"
-diff_output=$(diff -Z <(echo -n -e "$expected_output") <(echo -n -e "$actual_output"))
-exit_status=$?
-if [ $exit_status -eq 0 ]; then
-    echo "Test Passed: Output matches the expected output."
-else
-    echo "Test Failed: Output does not match the expected output."
-    echo "Actual output:"
-    echo "$actual_output"
-    echo "Differences:"
-    echo "$diff_output"
-fi
-
-if [ "$1" == "c++" ]; then
-    echo ""
-    # Clean up
-    rm hello_program
-fi
-
-# Exit with the appropriate status
-exit $exit_status
+--> "
