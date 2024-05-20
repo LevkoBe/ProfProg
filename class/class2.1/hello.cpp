@@ -4,19 +4,38 @@
 
 using namespace std;
 
+// It is better to encapsulate it to some class
+// and have member method to do different operations on the data
+// Other code may rely on the proposed API but internals will be hidden which will give more flexible way to support the code.
+// Prefer to use int32_t or uint32_t instead of int to specify the exact size and limits
 unordered_map<string, int> userHistory;
 
 void handleNameEntry(const string& name) {
     if (name == "bread") {
         userHistory.clear();
+        // Let's try std::println here and in other places
         cout << "Secret word was entered. Clearing all the history..." << endl;
+        // bad indent for return below:
             return;
     }
+
+    // If you will use encapsulation then you will able to add some method like
+    // int incrementUsage(const std::string& name)
+    // which will return the new count value
+    //  auto count = userHistory.incrementUsage(name);
+    //  if (count == 1) {
+    //      std::println("Welcome, {}!", name);
+    //  } else {
+    //      std::println("Hello again(x{}), {}!", count, name);
+    //  }
+
     if (userHistory.find(name) != userHistory.end()) {
         userHistory[name]++;
+        // std::println("Hello again(x{}), {}!", userHistory[name], name);
         cout << "Hello again(x" << userHistory[name] << "), " << name << "!" << endl;
     } else {
         userHistory[name] = 1;
+        // std::println("Welcome, {}!", name);
         cout << "Welcome, " << name << "!" << endl;
     }
 }
@@ -41,10 +60,29 @@ void handleTwoParts(const string& input) {
         errorMessage();
         return;
     }
+
+    // Avoid hardcoded values like "hello" and "delete"
+    // It is better to use constants for example
+    // namespace {
+    //     constexpr auto commanHello = "hello";
+    //     constexpr auto commandDelete = "delete";
+    //     constexpr auto commandSecretErase = "bread";
+    // }
+    // It allows to adjust things faster or localize program to another language faster if needed.
     if (firstPart == "hello") {
         handleNameEntry(secondPart);
         return;
     }
+    // Minor: In some cases if we return  from if parts then we can linearize the code like:
+    // if (firstPart == "hello") {
+    //     handleNameEntry(secondPart);
+    //     return;
+    // }
+    // if (firstPart == "delete") {
+    //     handleNameDeletion(secondPart);
+    //     return;
+    // }
+    // But it is not always the case - you can decide based on your own perception on how readable it is.
     else if (secondPart == "delete") {
         handleNameDeletion(firstPart);
         return;
@@ -64,6 +102,7 @@ int main() {
         
         size_t spacePos = input.find(' ');
         if (spacePos == string::npos) {
+            // We have copy paste of hello here thats why we need constants - any copy paste causes potential issues during code support
             if (input.find("hello") == 0 || input.find("hi") == 0) {
                 std::cout << "Hello!" << endl;
                 continue;

@@ -58,6 +58,14 @@ if [ "$1" == "rust" ]; then
     binaries="cargo run --quiet"
 fi
 
+# in general looks good but there are 2 points here:
+# 1. Better to use some helper for each step to compare expected and actual result => you will get the exact step in case of failure.
+#    Also comparing of aggregated output of 10 steps may show no errors while the errors can be present.
+#    For example, if step1 didn't generate output and step 2 generates 2 outputs expected from step 1 and 2.
+#    In this case program is not working ok but your test will not detect it.
+# 2. Each test case should be isolated - therefore we need some reset_environment function to setup proper prerequisites.
+#    otherwise result of the second test case will be affected by the first one activity.
+
 # Test cases
 run_test "Testing 'hi'" \
 "hi

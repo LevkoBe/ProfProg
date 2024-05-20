@@ -1,5 +1,6 @@
 use std::{collections::HashMap, io::Write};
 
+// the same concerns as for the class work - it is better to have data and logic encapsulation, some named constants for commands and so on.
 fn warning_message() {
     println!("Please, enter a valid command (e.g. \"hello [username]\", or \"[username] delete\").")
 }
