@@ -43,7 +43,7 @@ int main() {
     
     UnitTests stringTests;
 
-    stringTests.addTest("Display \"string\" twice",
+    stringTests.addTest("Expect_stringstring_When_2IsBiggestNumber",
     [](){
         // Build:
         std::vector<int> numbers = {0, 1, 2};
@@ -56,7 +56,7 @@ int main() {
         ASSERT_EQ(result, "stringstring")
     });
 
-    stringTests.addTest("Don't display \"string\" if numbers vector is empty",
+    stringTests.addTest("Expect_EmptyString_When_NoNumbers",
     [](){
         // Build:
         std::vector<int> numbers = {};
@@ -69,7 +69,7 @@ int main() {
         ASSERT_EQ(result, "")
     });
 
-    stringTests.addTest("Don't display \"string\" if numbers vector has no positive numbers",
+    stringTests.addTest("Expect_EmptyString_When_NoPositiveNumbers",
     [](){
         // Build:
         std::vector<int> numbers = {-1, -2};
@@ -82,7 +82,7 @@ int main() {
         ASSERT_EQ(result, "")
     });
 
-    stringTests.addTest("Don't display anything if string is empty",
+    stringTests.addTest("Expect_EmptyString_When_EmptyString",
     [](){
         // Build:
         std::vector<int> numbers = {0, 1, 2};
@@ -95,7 +95,7 @@ int main() {
         ASSERT_EQ(result, "")
     });
 
-    stringTests.addTest("Display \"string\" 6 times when biggest number is 6",
+    stringTests.addTest("Expect_string6times_When_6IsBiggestNumber",
     [](){
         // Build:
         std::vector<int> numbers = {-13, -4, -151, 0, 1, 6, -123};
