@@ -1,122 +1,105 @@
 #include <iostream>
 #include <string>
 #include <unordered_map>
+#include <print>
 
 using namespace std;
 
-// It is better to encapsulate it to some class
-// and have member method to do different operations on the data
-// Other code may rely on the proposed API but internals will be hidden which will give more flexible way to support the code.
-// Prefer to use int32_t or uint32_t instead of int to specify the exact size and limits
-unordered_map<string, int> userHistory;
-
-void handleNameEntry(const string& name) {
-    if (name == "bread") {
-        userHistory.clear();
-        // Let's try std::println here and in other places
-        cout << "Secret word was entered. Clearing all the history..." << endl;
-        // bad indent for return below:
-            return;
-    }
-
-    // If you will use encapsulation then you will able to add some method like
-    // int incrementUsage(const std::string& name)
-    // which will return the new count value
-    //  auto count = userHistory.incrementUsage(name);
-    //  if (count == 1) {
-    //      std::println("Welcome, {}!", name);
-    //  } else {
-    //      std::println("Hello again(x{}), {}!", count, name);
-    //  }
-
-    if (userHistory.find(name) != userHistory.end()) {
-        userHistory[name]++;
-        // std::println("Hello again(x{}), {}!", userHistory[name], name);
-        cout << "Hello again(x" << userHistory[name] << "), " << name << "!" << endl;
-    } else {
-        userHistory[name] = 1;
-        // std::println("Welcome, {}!", name);
-        cout << "Welcome, " << name << "!" << endl;
-    }
+namespace {
+    constexpr auto commandHello = "hello";
+    constexpr auto commandDelete = "delete";
+    constexpr auto commandSecretPhrase = "bread";
 }
 
-void handleNameDeletion(const string& name) {
-    if (userHistory.find(name) != userHistory.end()) {
-        userHistory.erase(name);
-        cout << "History for " << name << " was deleted." << endl;
+class NameCounter {
+    unordered_map<string, uint32_t> userHistory;
+public:
+    void incrementCounter(const std::string& name) {
+        userHistory[name]++;
+    }
+
+    void greet(const std::string& name) {
+        if (userHistory[name] == 1) {
+            std::println("Welcome, {}!", name);
+        } else {
+            std::println("Hello again(x{}), {}!", userHistory[name], name);
+        }
+    }
+
+    void deleteCounter(const std::string& name) {
+        if (userHistory.find(name) != userHistory.end()) {
+            userHistory.erase(name);
+            std::println("History for {} was deleted.", name);
+        } else {
+            std::println("No history found for {}.", name);
+        }
+    }
+
+    void clearAll() {
+        userHistory.clear();
+    }
+};
+
+void handleNameEntry(NameCounter& userHistory, const string& name) {
+    if (name == commandSecretPhrase) {
+        std::println("Secret word was entered. Clearing all the history...");
+        userHistory.clearAll();
     } else {
-        cout << "No history found for " << name << "." << endl;
+        userHistory.incrementCounter(name);
+        userHistory.greet(name);
     }
 }
 
 void errorMessage() {
-    cout << "Please, enter a valid command (e.g. \"hello [username]\", or \"[username] delete\")." << endl;
+    std::println("Please, enter a valid command (e.g. \"hello [username]\", or \"[username] delete\").");
 }
 
-void handleTwoParts(const string& input) {
-    string firstPart = input.substr(0, input.find(' '));
-    string secondPart = input.substr(input.find(' ') + 1);
+void handleTwoParts(NameCounter& userHistory, const string& input) {
+    size_t spacePos = input.find(' ');
+    if (spacePos == string::npos) {
+        errorMessage();
+        return;
+    }
+    
+    string firstPart = input.substr(0, spacePos);
+    string secondPart = input.substr(spacePos + 1);
+
     if (firstPart.empty() || secondPart.empty()) {
         errorMessage();
         return;
     }
 
-    // Avoid hardcoded values like "hello" and "delete"
-    // It is better to use constants for example
-    // namespace {
-    //     constexpr auto commanHello = "hello";
-    //     constexpr auto commandDelete = "delete";
-    //     constexpr auto commandSecretErase = "bread";
-    // }
-    // It allows to adjust things faster or localize program to another language faster if needed.
-    if (firstPart == "hello") {
-        handleNameEntry(secondPart);
-        return;
-    }
-    // Minor: In some cases if we return  from if parts then we can linearize the code like:
-    // if (firstPart == "hello") {
-    //     handleNameEntry(secondPart);
-    //     return;
-    // }
-    // if (firstPart == "delete") {
-    //     handleNameDeletion(secondPart);
-    //     return;
-    // }
-    // But it is not always the case - you can decide based on your own perception on how readable it is.
-    else if (secondPart == "delete") {
-        handleNameDeletion(firstPart);
-        return;
-    }
-    else {
+    if (firstPart == commandHello) {
+        handleNameEntry(userHistory, secondPart);
+    } else if (secondPart == commandDelete) {
+        userHistory.deleteCounter(firstPart);
+    } else {
         errorMessage();
-        return;
     }
 }
 
 int main() {
+    NameCounter userHistory;
     string input;
     
     while (true) {
-        cout << "--> ";
-        getline(cin, input);
-        
-        size_t spacePos = input.find(' ');
-        if (spacePos == string::npos) {
-            // We have copy paste of hello here thats why we need constants - any copy paste causes potential issues during code support
-            if (input.find("hello") == 0 || input.find("hi") == 0) {
-                std::cout << "Hello!" << endl;
-                continue;
-            }
-            if (input == "exit") {
-                break;
-            }
-            else {
-                errorMessage();
-            }
-            continue;
+        std::print("--> ");
+        std::getline(cin, input);
+
+        if (input == "exit") {
+            break;
         }
 
-        handleTwoParts(input);
+        size_t spacePos = input.find(' ');
+        if (spacePos == string::npos) {
+            if (input.find(commandHello) == 0 || input.find("hi") == 0) {
+                std::println("Hello!");
+            } else {
+                errorMessage();
+            }
+        } else {
+            handleTwoParts(userHistory, input);
+        }
     }
 
     return 0;

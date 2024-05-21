@@ -196,3 +196,8 @@ exit" \
 --> Hello!
 --> Please, enter a valid command (e.g. \"hello [username]\", or \"[username] delete\").
 --> "
+
+# Clean up
+if [ "$1" == "c++" ]; then
+    rm -f hello_program
+fi
