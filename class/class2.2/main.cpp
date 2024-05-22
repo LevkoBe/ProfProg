@@ -2,12 +2,13 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <print>
 #include <tuple>
 #include <cstdlib>
 
 bool validateFilename(const std::string& filename) {
     if (filename.length() < 4 || filename.substr(filename.length() - 4) != ".txt") {
-        std::cout << "Filename must end with \".txt\"" << std::endl;
+        std::println("Filename must end with \".txt\"");
         return false;
     }
     return true;
@@ -19,15 +20,7 @@ bool validateColor(const std::string& color) {
     char comma1, comma2;
     if (!(ss >> r >> comma1 >> g >> comma2 >> b) || comma1 != ',' || comma2 != ',' ||
         r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255) {
-        std::cout << "Invalid color format. Please enter in format \"R,G,B\" where R, G, and B are integers between 0 and 255." << std::endl;
-        return false;
-    }
-    return true;
-}
-
-bool validateOutputFilename(const std::string& filename) {
-    if (filename.length() < 4 || filename.substr(filename.length() - 4) != ".txt") {
-        std::cout << "Output filename must end with \".txt\"" << std::endl;
+        std::println("Invalid color format. Please enter in format \"R,G,B\" where R, G, and B are integers between 0 and 255.");
         return false;
     }
     return true;
@@ -35,32 +28,26 @@ bool validateOutputFilename(const std::string& filename) {
 
 std::tuple<std::string, std::string, std::string> user_input() {
     std::string filename, color, o_filename;
-    bool validInput = false;
     
-    while (!validInput) {
-        std::cout << "Please, enter the name of the file with the image: ";
+    std::print("Please, enter the name of the file with the image: ");
+    while (true) {
         std::cin >> filename;
-        if (validateFilename(filename)) {
-            validInput = true;
-        }
+        if (validateFilename(filename)) { break; }
+        std::print("Please provide correct file name: ");
     }
 
-    validInput = false;
-    while (!validInput) {
-        std::cout << "Please, enter your favorite color (format \"0,0,0\"): ";
+    std::print("Please, enter your favorite color (format \"0,0,0\"): ");
+    while (true) {
         std::cin >> color;
-        if (validateColor(color)) {
-            validInput = true;
-        }
+        if (validateColor(color)) { break; }
+        std::print("Please, enter your favorite color (format \"0,0,0\"): ");
     }
 
-    validInput = false;
-    while (!validInput) {
-        std::cout << "Please, enter the output file name: ";
+    std::print("Please, enter the output file name: ");
+    while (true) {
         std::cin >> o_filename;
-        if (validateOutputFilename(o_filename)) {
-            validInput = true;
-        }
+        if (validateFilename(o_filename)) { break; }
+        std::print("Please provide correct file name: ");
     }
 
     return std::make_tuple(filename, color, o_filename);
@@ -75,15 +62,6 @@ void fill_into_array(std::string array[16][16], int x, int y, const std::string&
         if (y > 0) {
             array[x][y - 1] = color;
         }
-    }
-}
-
-void display_array(const std::string array[16][16]) {
-    for (int i = 0; i < 16; i++) {
-        for (int j = 0; j < 16; j++) {
-            std::cout << array[i][j] << " ";
-        }
-        std::cout << std::endl;
     }
 }
 
@@ -126,7 +104,7 @@ int main() {
         outputFile << std::endl;
     }
     outputFile.close();
-    std::cout << "Image saved to " << o_filename << std::endl;
+    std::println("Image saved to {}", o_filename);
 
     return 0;
 }
