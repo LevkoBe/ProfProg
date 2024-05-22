@@ -8,7 +8,7 @@ a. Use the following flags to use headers from include folder and compile Helper
 
 -Iinclude src/test.cpp src/Helpers.cpp -o test
 ```
-$ ../class2.1/compile.sh -Iinclude src/test.cpp src/Helpers.cpp -o test
+../class2.1/compile.sh -Iinclude src/test.cpp src/Helpers.cpp -o test
 ./test
 ```
 b. Run the test binary with ./test
