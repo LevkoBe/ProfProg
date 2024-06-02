@@ -50,9 +50,9 @@ EOF
     echo "  Exit status for output comparison: $exit_status_output"
     
     if [ $exit_status_file -eq 0 ] && [ $exit_status_output -eq 0 ]; then
-        echo "Test Passed: Actual and expected outputs match."
+        echo -e "\e[32mTest Passed: Actual and expected outputs match.\e[0m"
     else
-        echo "Test Failed:"
+        echo -e "\e[31mTest Failed:\e[0m"
         if [ $exit_status_file -ne 0 ]; then
             echo "File contents do not match."
             echo "Differences in file:"
