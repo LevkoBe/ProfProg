@@ -55,7 +55,6 @@ fn main() {
     let b = 4.0;
     let c = 5.0;
     let is_valid = Triangle::is_valid(a, b, c);
-    println!("Is valid: {}", is_valid);
     match Triangle::new(a, b, c) {
         Ok(triangle) => {
             let area = triangle.calculate_area();

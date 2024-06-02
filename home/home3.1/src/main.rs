@@ -1,7 +1,7 @@
 fn main() {
-    let x = 0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001;
-    let y = 0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002;
-    let z = 0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003;
+    let x = 1e-300;
+    let y = 2e-300;
+    let z = 3e-300;
     let result = magic_operation(x, y, z);
     println!("{}", result);
     println!("Hello, world!");
@@ -31,8 +31,10 @@ mod tests {
         let y = 2.0;
         let z = 3.0;
         let product_inverse = 1.0 / (x * y * z);
+
         // Act
         let result = magic_operation(x, y, z);
+
         // Assert
         assert!(
             (result - product_inverse).abs() < f64::EPSILON,
@@ -47,8 +49,10 @@ mod tests {
         let y = 2.0;
         let z = 0.0;
         let sum_inverse = 1.0 / (x + y + z);
+
         // Act
         let result = magic_operation(x, y, z);
+
         // Assert
         assert!(
             (result - sum_inverse).abs() < f64::EPSILON,
@@ -59,12 +63,14 @@ mod tests {
     #[test]
     fn expect_special_case_when_small_numbers() {
         // Arrange
-        let x = 0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001;
-        let y = 0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002;
-        let z = 0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003;
+        let x = 1e-300;
+        let y = 2e-300;
+        let z = 3e-300;
         let special_case_result = x + (y + 1.0) * (z - 1.0);
+
         // Act
         let result = magic_operation(x, y, z);
+
         // Assert
         assert!(
             (result - special_case_result).abs() < f64::EPSILON,
@@ -79,8 +85,10 @@ mod tests {
         let y = 1.0;
         let z = -1.0;
         let special_case_result = x + (y + 1.0) * (z - 1.0);
+
         // Act
         let result = magic_operation(x, y, z);
+
         // Assert
         assert!(
             (result - special_case_result).abs() < f64::EPSILON,

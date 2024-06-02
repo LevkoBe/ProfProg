@@ -5,4 +5,4 @@
 
 double dummyFunc(double x);
 
-std::string repeatString(std::vector<int>& numbers, std::string& stringToRepeat);
+std::string repeatString(const std::vector<int>& numbers, const std::string& stringToRepeat);
