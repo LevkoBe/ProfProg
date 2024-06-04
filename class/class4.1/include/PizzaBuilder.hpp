@@ -1,60 +1,43 @@
+// PizzaBuilder.hpp
 #pragma once
 
 #include <iostream>
 #include <vector>
 #include <memory>
+#include <unordered_map>
 #include <Pizza.hpp>
+#include <Constants.hpp>
 
 class PizzaBuilder {
-    std::unique_ptr<Pizza> pizzaPtr;
+    Pizza pizza;
+    std::unordered_map<std::string, double> ingredientCosts;
 public:
-    PizzaBuilder() : pizzaPtr(std::make_unique<Pizza>()) {}
+    PizzaBuilder() = default;
 
-    Pizza&& build() {
-        return std::move(*pizzaPtr);
-    }
+    PizzaBuilder(const std::unordered_map<std::string, double>& costs): ingredientCosts(costs) {}
 
-    PizzaBuilder& addIngredient(const std::string& ingredient) {
-        double ingredientCost = 0.0;
-        if (ingredient == CHEESE) {
-            pizzaPtr->cheese = true;
-            ingredientCost = 1.5;
-        } else if (ingredient == PEPPERONI) {
-            pizzaPtr->pepperoni = true;
-            ingredientCost = 2.0;
-        } else if (ingredient == HAM) {
-            pizzaPtr->ham = true;
-            ingredientCost = 2.0;
-        } else if (ingredient == SAUSAGE) {
-            pizzaPtr->sausage = true;
-            ingredientCost = 1.8;
-        } else if (ingredient == MUSHROOMS) {
-            pizzaPtr->mushrooms = true;
-            ingredientCost = 1.2;
-        } else if (ingredient == ONIONS) {
-            pizzaPtr->onions = true;
-            ingredientCost = 0.8;
-        } else if (ingredient == OLIVES) {
-            pizzaPtr->olives = true;
-            ingredientCost = 1.0;
-        } else if (ingredient == PINEAPPLE) {
-            pizzaPtr->pineapple = true;
-            ingredientCost = 1.5;
-        } else if (ingredient == BACON) {
-            pizzaPtr->bacon = true;
-            ingredientCost = 2.2;
-        } else if (ingredient == CHICKEN) {
-            pizzaPtr->chicken = true;
-            ingredientCost = 2.5;
-        }
-        pizzaPtr->cost += ingredientCost;
+    PizzaBuilder& setIngredientCosts(const std::unordered_map<std::string, double>& costs) {
+        ingredientCosts = costs;
         return *this;
     }
 
-    void superviseBuild(const std::vector<std::string>& ingredientsAvailable) {
+    [[nodiscard("Do not drop pizza!")]]
+    Pizza build() {
+        return std::move(pizza);
+    }
+
+    PizzaBuilder& addIngredient(const std::string& ingredient) {
+        auto it = ingredientCosts.find(ingredient);
+        if (it != ingredientCosts.end()) {
+            pizza.addIngredient(ingredient, it->second);
+        }
+        return *this;
+    }
+
+    void superviseBuild(const std::unordered_map<std::string, double>& ingredientsAvailable) {
         std::cout << "Available ingredients are: ";
         for (const auto& ingredient : ingredientsAvailable) {
-            std::cout << ingredient << " ";
+            std::cout << ingredient.first << " ";
         }
         std::cout << "\nEnter the ingredients you want to add (type 'done' when finished): ";
         
@@ -64,7 +47,7 @@ public:
             if (ingredient == "done") {
                 break;
             }
-            if (std::find(ingredientsAvailable.begin(), ingredientsAvailable.end(), ingredient) != ingredientsAvailable.end()) {
+            if (ingredientsAvailable.find(ingredient) != ingredientsAvailable.end()) {
                 addIngredient(ingredient);
             } else {
                 std::cout << "Invalid ingredient. Please enter a valid ingredient or 'done' to finish: ";

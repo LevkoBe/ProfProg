@@ -6,20 +6,18 @@
 
 class Pizza {
     friend class PizzaBuilder;
-    bool cheese;
-    bool pepperoni;
-    bool ham;
-    bool sausage;
-    bool mushrooms;
-    bool onions;
-    bool olives;
-    bool pineapple;
-    bool bacon;
-    bool chicken;
-    double cost;
+    bool cheese = false;
+    bool pepperoni = false;
+    bool ham = false;
+    bool sausage = false;
+    bool mushrooms = false;
+    bool onions = false;
+    bool olives = false;
+    bool pineapple = false;
+    bool bacon = false;
+    bool chicken = false;
+    double cost = 0.0;
 public:
-    Pizza() : cheese(false), pepperoni(false), ham(false), sausage(false), mushrooms(false), onions(false), olives(false), pineapple(false), bacon(false), chicken(false), cost(0.0) {}
-
     std::vector<std::string> getIngredients() const {
         std::vector<std::string> ingredients;
 
@@ -52,5 +50,51 @@ public:
 
     double getCost() const {
         return cost;
+    }
+    
+    void addIngredient(const std::string& ingredient, double ingredientCost) {
+        if (ingredient == CHEESE && !cheese) {
+            cheese = true;
+            cost += ingredientCost;
+        }
+        else if (ingredient == PEPPERONI && !pepperoni) {
+            pepperoni = true;
+            cost += ingredientCost;
+        }
+        else if (ingredient == HAM && !ham) {
+            ham = true;
+            cost += ingredientCost;
+        }
+        else if (ingredient == SAUSAGE && !sausage) {
+            sausage = true;
+            cost += ingredientCost;
+        }
+        else if (ingredient == MUSHROOMS && !mushrooms) {
+            mushrooms = true;
+            cost += ingredientCost;
+        }
+        else if (ingredient == ONIONS && !onions) {
+            onions = true;
+            cost += ingredientCost;
+        }
+        else if (ingredient == OLIVES && !olives) {
+            olives = true;
+            cost += ingredientCost;
+        }
+        else if (ingredient == PINEAPPLE && !pineapple) {
+            pineapple = true;
+            cost += ingredientCost;
+        }
+        else if (ingredient == BACON && !bacon) {
+            bacon = true;
+            cost += ingredientCost;
+        }
+        else if (ingredient == CHICKEN && !chicken) {
+            chicken = true;
+            cost += ingredientCost;
+        }
+        else {
+            throw std::runtime_error("Invalid ingredient");
+        }
     }
 };
