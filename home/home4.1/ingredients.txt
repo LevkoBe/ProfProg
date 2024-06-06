@@ -1,0 +1,7 @@
+sausage 1.8
+mushrooms 1.2
+onions 0.8
+olives 1
+pineapple 1.5
+bacon 2.2
+chicken 2.5

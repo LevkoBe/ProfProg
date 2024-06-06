@@ -1,0 +1,13 @@
+cheese 1.5
+cheese 1.5
+cheese 1.5
+cheese 1.5
+pepperoni 2.0
+ham 2.0
+sausage 1.8
+mushrooms 1.2
+onions 0.8
+olives 1.0
+pineapple 1.5
+bacon 2.2
+chicken 2.5
