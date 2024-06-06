@@ -3,3 +3,4 @@ practice*
 test
 *.lock
 .vscode/
+settings*
