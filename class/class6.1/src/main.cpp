@@ -8,11 +8,14 @@
 #include <map>
 #include <memory>
 #include <print>
+#include <queue>
+#include <condition_variable>
+#include <format>
 
 struct Message {
     virtual std::string getMessage() const = 0;
     virtual std::string getType() const = 0;
-    virtual ~Message() = default; // Add virtual destructor
+    virtual ~Message() = default;
 };
 
 struct GreenMessage : Message {
@@ -22,14 +25,14 @@ struct GreenMessage : Message {
     GreenMessage(std::string message, int counter) : message(message), counter(counter) {}
 
     std::string getMessage() const override {
-        return message + " " + std::to_string(counter);
+        return std::format("{} {}", message, counter);
     }
 
     std::string getType() const override {
         return "GreenMessage";
     }
 
-    ~GreenMessage() override = default; // Virtual destructor
+    ~GreenMessage() override = default;
 };
 
 struct BlueMessage : Message {
@@ -39,14 +42,14 @@ struct BlueMessage : Message {
     BlueMessage(double value1, double value2) : value1(value1), value2(value2) {}
 
     std::string getMessage() const override {
-        return std::to_string(value1) + " " + std::to_string(value2);
+        return std::format("{} {}", value1, value2);
     }
 
     std::string getType() const override {
         return "BlueMessage";
     }
 
-    ~BlueMessage() override = default; // Virtual destructor
+    ~BlueMessage() override = default;
 };
 
 struct OrangeMessage : Message {
@@ -55,39 +58,75 @@ struct OrangeMessage : Message {
     int integer;
     double doubleValue;
 
-    OrangeMessage(std::string string1, std::string string2, int integer, double doubleValue) 
+    OrangeMessage(std::string string1, std::string string2, int integer, double doubleValue)
         : string1(string1), string2(string2), integer(integer), doubleValue(doubleValue) {}
 
     std::string getMessage() const override {
-        return string1 + " " + string2 + " " + std::to_string(integer) + " " + std::to_string(doubleValue);
+        return std::format("{} {} {} {}", string1, string2, integer, doubleValue);
     }
 
     std::string getType() const override {
         return "OrangeMessage";
     }
 
-    ~OrangeMessage() override = default; // Virtual destructor
+    ~OrangeMessage() override = default;
 };
 
 class MessageDispatcher {
 private:
     std::map<std::string, std::vector<std::function<void(std::shared_ptr<Message>)>>> subscribers;
     std::mutex mtx;
+    std::queue<std::shared_ptr<Message>> messageQueue;
+    std::condition_variable cv;
+    bool stop = false;
 
 public:
+    MessageDispatcher() {
+        std::thread(&MessageDispatcher::dispatchMessages, this).detach();
+    }
+
     void subscribe(const std::string& messageType, std::function<void(std::shared_ptr<Message>)> callback) {
         std::lock_guard<std::mutex> lock(mtx);
         subscribers[messageType].push_back(callback);
     }
 
     void publish(std::shared_ptr<Message> message) {
-        std::lock_guard<std::mutex> lock(mtx);
-        std::string messageType = message->getType();
-        if (subscribers.find(messageType) != subscribers.end()) {
-            for (auto& callback : subscribers[messageType]) {
-                callback(message);
+        {
+            std::lock_guard<std::mutex> lock(mtx);
+            messageQueue.push(message);
+        }
+        cv.notify_one();
+    }
+
+    void dispatchMessages() {
+        while (true) {
+            std::shared_ptr<Message> message;
+            {
+                std::unique_lock<std::mutex> lock(mtx);
+                cv.wait(lock, [this] { return !messageQueue.empty() || stop; });
+                if (stop && messageQueue.empty()) return;
+                message = messageQueue.front();
+                messageQueue.pop();
+            }
+            std::string messageType = message->getType();
+            if (subscribers.find(messageType) != subscribers.end()) {
+                for (auto& callback : subscribers[messageType]) {
+                    callback(message);
+                }
             }
         }
+    }
+
+    void stopDispatcher() {
+        {
+            std::lock_guard<std::mutex> lock(mtx);
+            stop = true;
+        }
+        cv.notify_all();
+    }
+
+    ~MessageDispatcher() {
+        stopDispatcher();
     }
 };
 
