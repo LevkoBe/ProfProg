@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <print>
 #include <string>
 #include <unordered_map>
 
@@ -27,7 +28,7 @@ public:
             }
             file.close();
         } else {
-            std::cerr << "Unable to open file." << std::endl;
+            std::println(std::cerr, "Unable to open file.");
         }
         return ingredients;
     }
@@ -36,7 +37,7 @@ public:
         std::ofstream outputFile(filename);
         if (outputFile.is_open()) {
             for (const auto& pair : ingredients) {
-                outputFile << pair.first << " " << pair.second << std::endl;
+                std::println(outputFile, "{} {}", pair.first, pair.second);
             }
             outputFile.close();
         }
